@@ -3,6 +3,7 @@ const express = require('express');
 const passport = require('passport');
 const session = require('express-session');
 const { Issuer, Strategy } = require('openid-client');
+const { affinidiProvider } = require('@affinidi/passport-affinidi')
 const http = require("http");
 require("dotenv").config();
 
@@ -1132,10 +1133,23 @@ articles = [
   }
 ]
 
-app.get('/', (req, res) => {
-  // Increment 'page_views' and send the response
-  req.session.page_views++;
-  res.send(`Page views: ${req.session.page_views}`);
+const initializeServer = async () => {
+// app.get('/', (req, res) => {
+//   // Increment 'page_views' and send the response
+//   req.session.page_views++;
+//   res.send(`Page views: ${req.session.page_views}`);
+// });
+
+app.get('/', function (req, res, next) {
+    res.json({ success: 'Express' });
+});
+
+await affinidiProvider(app, {
+    id: "affinidi",
+    issuer: process.env.AFFINIDI_ISSUER,
+    client_id: process.env.AFFINIDI_CLIENT_ID,
+    client_secret: process.env.AFFINIDI_CLIENT_SECRET,
+    redirect_uris: ['http://localhost:3000/auth/callback']
 });
 
 app.get('/articles', (req, res) => {
@@ -1174,7 +1188,6 @@ app.get("/protected", (req, res) => {
     res.end(JSON.stringify(req.user, null, 4));
 })
 
-// 4. Start the http server
 const httpServer = http.createServer(app)
 httpServer.listen(8080, () => {
     console.log(`Hello World - Affinidi Login : Up and running on 8080`)
@@ -1207,3 +1220,7 @@ Issuer.discover(process.env.AFFINIDI_ISSUER).then(function (oidcIssuer) {
   passport.deserializeUser(function (user, done) {
     done(null, user);
   });
+
+}
+
+initializeServer();
