@@ -16,7 +16,7 @@ function Header() {
   return (
     <header>
       <h1>
-        <Link to="/">Lorem Blogum</Link>
+        <Link to="/">Articly</Link>
       </h1>
       
       {!profile && <>
