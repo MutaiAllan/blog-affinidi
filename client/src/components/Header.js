@@ -14,14 +14,12 @@ function Header() {
  const [localProfile, setLocalProfile] = useState(null);
 
  useEffect(() => {
-  // Convert objects to strings to compare them
   const currentProfileStr = JSON.stringify(profile);
   const localProfileStr = JSON.stringify(localProfile);
 
-  // Only update if the stringified versions differ
   if (currentProfileStr !== localProfileStr) {
     setLocalProfile(profile);
-    setProfile(profile); // assuming setProfile comes from a context and is stable
+    setProfile(profile);
   }
 }, [profile])
 
@@ -66,12 +64,6 @@ return <AffinidiLoginButton />;
       </h1>
       
       {renderLoginState()}
-
-      {/* {profile && <>
-          <button style={{ marginRight: 10 }} onClick={logout}>
-            Logout
-          </button>
-        </>} */}
 
       {isLoading && <p>Loading...</p>}
     </header>

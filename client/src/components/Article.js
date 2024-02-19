@@ -60,11 +60,6 @@ function Article({ userProfile }) {
           <em>Written by {author}</em>
         </p>
       </small>
-      {userProfile ? (
-        <ReactMarkdown>{content}</ReactMarkdown>
-      ) : (
-        <p>Please log in to view this content.</p>
-      )}
     </article>
   );
 }
