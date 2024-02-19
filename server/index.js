@@ -1,4 +1,3 @@
-//  1. Import required Libraries
 const express = require('express');
 const passport = require('passport');
 const session = require('express-session');
@@ -7,7 +6,6 @@ const { affinidiProvider } = require('@affinidi/passport-affinidi')
 const http = require("http");
 require("dotenv").config();
 
-//  2. Create an express application and setup session
 const app = express();
 app.use(session({
     secret: 'my-secret',
@@ -18,17 +16,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use((req, res, next) => {
-  // Check if 'page_views' is not in session
   if (!req.session.page_views) {
-      req.session.page_views = 0; // Initialize 'page_views' to 0
+      req.session.page_views = 0;
   }
-  next(); // Call the next middleware function in the stack
+  next();
 });
-
-// 3. Define application end-points
-// app.get("/", (req, res) => {
-//     res.send(" Login to view more articles <br/><br/><a href='/login'> Affinidi Login</a>");
-// })
 
 articles = [
   {
@@ -1134,93 +1126,66 @@ articles = [
 ]
 
 const initializeServer = async () => {
-// app.get('/', (req, res) => {
-//   // Increment 'page_views' and send the response
-//   req.session.page_views++;
-//   res.send(`Page views: ${req.session.page_views}`);
-// });
+    // app.get('/', (req, res) => {
+    //   // Increment 'page_views' and send the response
+    //   req.session.page_views++;
+    //   res.send(`Page views: ${req.session.page_views}`);
+    // });
 
-app.get('/', function (req, res, next) {
-    res.json({ success: 'Express' });
-});
-
-await affinidiProvider(app, {
-    id: "affinidi",
-    issuer: process.env.AFFINIDI_ISSUER,
-    client_id: process.env.AFFINIDI_CLIENT_ID,
-    client_secret: process.env.AFFINIDI_CLIENT_SECRET,
-    redirect_uris: ['http://localhost:3000/auth/callback']
-});
-
-app.get('/articles', (req, res) => {
-  // Send the list of articles as a JSON response
-  res.json(articles);
-});
-
-app.get('/articles/:id', (req, res) => {
-  const id = parseInt(req.params.id); // Extract the article ID from the URL parameter
-
-  // Find the article with the specified ID
-  const article = articles.find(article => article.id === id);
-
-  if (!article) {
-      // If no article found, send a 404 Not Found response
-      return res.status(404).json({ message: 'Article not found' });
-  }
-
-  // Send the article as a JSON response
-  res.json(article);
-});
-
-app.get('/login',
-    function (req, res, next) {
-        next();
-    },
-    passport.authenticate('affinidi-login',{scope:'openid'})
-);
-
-app.get('/login/callback', (req, res, next) => {
-    passport.authenticate('affinidi-login', {successRedirect: '/protected', failureRedirect: '/'})(req,res,next)
-})
-
-app.get("/protected", (req, res) => {
-    res.header("Content-Type", 'application/json');
-    res.end(JSON.stringify(req.user, null, 4));
-})
-
-const httpServer = http.createServer(app)
-httpServer.listen(8080, () => {
-    console.log(`Hello World - Affinidi Login : Up and running on 8080`)
-})
-
-// 5. Integrate Authentication
-// 5a. Discover Affinidi Login - Issuer
-Issuer.discover(process.env.AFFINIDI_ISSUER).then(function (oidcIssuer) {
-    // 5b. Create a RP-client which can initiate an OIDC flow
-    var client = new oidcIssuer.Client({
-      client_id: process.env.AFFINIDI_CLIENT_ID,
-      client_secret: process.env.AFFINIDI_CLIENT_SECRET,
-      redirect_uris: ["http://localhost:8080/login/callback"],
-      response_types: ['code'],
-      token_endpoint_auth_method: 'client_secret_post'
+    app.get('/', function (req, res, next) {
+        res.json({ success: 'Express' });
     });
 
-    // 5c. Provide this strategy to the passport middleware
-    passport.use(
-      'affinidi-login', new Strategy({ client, passReqToCallback: true }, (req, tokenSet, userinfo, done) => {
-        req.session.tokenSet = tokenSet;
-        req.session.userinfo = userinfo;
-        return done(null, tokenSet.claims());
-      }));
-  });
+    await affinidiProvider(app, {
+        id: "affinidi",
+        issuer: process.env.AFFINIDI_ISSUER,
+        client_id: process.env.AFFINIDI_CLIENT_ID,
+        client_secret: process.env.AFFINIDI_CLIENT_SECRET,
+        redirect_uris: ['http://localhost:3000/auth/callback'],
+        handleCredential: (credential) => {
+            console.log('Received credential:', credential);
+        },
+    });
 
-  passport.serializeUser(function (user, done) {
-    done(null, user);
-  });
-  passport.deserializeUser(function (user, done) {
-    done(null, user);
-  });
+    app.get('/articles', (req, res) => {
+    res.json(articles);
+    });
 
+    app.get('/articles/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const article = articles.find(article => article.id === id);
+    req.session.page_views++;
+
+    if (!article) {
+        return res.status(404).json({ message: 'Article not found' });
+    }
+
+    if (req.session.page_views < 5){
+        res.json(article);
+    } else {
+        return res.status(400).json({ message: 'Limit reached' });
+    }
+    });
+
+    app.get('/login',
+        function (req, res, next) {
+            next();
+        },
+        passport.authenticate('affinidi-login',{scope:'openid'})
+    );
+
+    app.get('/login/callback', (req, res, next) => {
+        passport.authenticate('affinidi-login', {successRedirect: '/protected', failureRedirect: '/'})(req,res,next)
+    })
+
+    app.get("/protected", (req, res) => {
+        res.header("Content-Type", 'application/json');
+        res.end(JSON.stringify(req.user, null, 4));
+    })
+
+    app.listen(3001, () => {
+        console.log(`Affinidi Login running on 3001`)
+    })
 }
 
 initializeServer();

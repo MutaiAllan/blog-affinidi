@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Home from "./components/Home";
 import Header from "./components/Header";
 import UserContext from './context/UserContext';
+import Article from "./components/Article";
 import React, {useState} from 'react';
 
 
@@ -17,7 +18,9 @@ function App() {
           <Route exact path="/">
             <Home />
           </Route>
-          {/* Other routes */}
+          <Route exact path="/articles/:id">
+          <Article isLoggedIn={userProfile} />
+        </Route>
         </Switch>
       </div>
     </Router>
