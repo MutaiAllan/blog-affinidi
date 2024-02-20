@@ -5,6 +5,7 @@ const { Issuer, Strategy } = require('openid-client');
 const { affinidiProvider } = require('@affinidi/passport-affinidi')
 const http = require("http");
 require("dotenv").config();
+const cors = require('cors');
 
 const app = express();
 app.use(session({
@@ -14,6 +15,8 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(cors());
 
 app.use((req, res, next) => {
   if (!req.session.page_views) {
