@@ -17,7 +17,7 @@ function Article({ userProfile }) {
   useEffect(() => {
     if (userProfile) {
       setState(initialState);
-      fetch(`/articles/${id}`).then((r) => {
+      fetch(`https://blog-affinidi-7ssp.vercel.app/articles/${id}`).then((r) => {
         if (r.ok) {
           r.json().then((article) =>
             setState({ article, error: null, status: "resolved" })

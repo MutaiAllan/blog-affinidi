@@ -5,7 +5,7 @@ import { makeEmojiList } from "./emoji";
 function Home() {
   const [articles, setArticles] = useState([]);
   useEffect(() => {
-    fetch("/articles")
+    fetch("https://blog-affinidi-7ssp.vercel.app/articles")
       .then((r) => r.json())
       .then(setArticles);
   }, []);
