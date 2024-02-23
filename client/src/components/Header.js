@@ -24,14 +24,11 @@ function Header() {
 }, [profile])
 
 const renderLoginState = () => {
-  console.log(profile)
   if (isLoading) {
-    console.log(profile)
     return <p>Loading...</p>;
   }
 
   if (error) {
-    console.log(profile)
     handleLogout();
     return (
       <div>
@@ -40,10 +37,11 @@ const renderLoginState = () => {
     );
   }
 
-  if (profile) {
+  if (!profile) {
       return (
         <div>
-          <span>Welcome, {profile.givenName}</span>
+          {/* <span>Welcome, {profile.givenName}</span> */}
+          <span>Welcome, mutaiallan</span><br></br>
           <button onClick={logout}>Logout</button>
         </div>
       );

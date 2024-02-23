@@ -15,7 +15,7 @@ function Article({ userProfile }) {
   const { id } = useParams();
 
   useEffect(() => {
-    if (userProfile) {
+    if (!userProfile) {
       setState(initialState);
       fetch(`https://blog-affinidi-7ssp.vercel.app/articles/${id}`).then((r) => {
         if (r.ok) {
@@ -31,14 +31,18 @@ function Article({ userProfile }) {
     }
   }, [id, userProfile]);
 
-  if (!userProfile) {
+  if (userProfile) {
     return (
+      <>
       <p>Please log in to view this content.</p>
+      {/* <Paywall /> */}
+      </>
     );
   }
   if (status === "pending") return <h1>Loading...</h1>;
 
-  if (status === "rejected") {
+  if (status === "resolved") {
+    return <Paywall />;
     if (error === "Maximum pageview limit reached") {
       return <Paywall />;
     } else {
@@ -60,6 +64,7 @@ function Article({ userProfile }) {
           <em>Written by {author}</em>
         </p>
       </small>
+      <p>{content}</p>
     </article>
   );
 }
